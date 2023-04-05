@@ -50,7 +50,7 @@ class Node {
             {
                 if (i == index)
                 {
-                    cout << "We are here" << endl;
+                    cout << "We are here" << endl; // TODO: remove
                     cout << currentNode << endl;
                     cout << "Brand: " << currentNode->brand << endl;
                     cout << "Model: " << currentNode->model << endl;
@@ -126,38 +126,9 @@ class Node {
             delete current;
         }
 
-        // static void addElement(Node *head, int index = -1)
-        // {
-        //     // По дефолту добавляет елемент в конец
-        //     Node *currentNode;
-
-        //     string brand, model;
-        //     float liters;
-        //     int numberOfSeats;
-        //     bool isOnTheRun;
-
-        //     if (index == -1) {
-        //         while(head) {
-        //             currentNode = head;
-        //             if (head->next == NULL) {
-
-        //             }
-        //             head = head->next;
-
-        //         }
-        //     } else {
-        //         for (int i = 0; i < index; i++)
-        //         {
-        //             currentNode = head;
-        //             head = head->next;
-        //         }
-        //     }
-            
-        // }
-
-        static void addNodeByIndex(Node *head, int index = -1)
+        static void addNodeByIndex(Node *&head, string brand, string model, float liters, int numberOfSeats, bool isOnRun, int index = -1)
         {
-            Node *newNode = new Node("brand", "model", 3.6, 4, true);
+            Node *newNode = new Node(brand, model, liters, numberOfSeats, isOnRun);
             if (index < -1)
             {
                 cout << "Index out of range." << endl;
@@ -224,94 +195,123 @@ json parseJsonCars(string path)
 
 int main()
 {
-    int menuNumber, amount, index;
-    string currentCarKey;
-    json carsJson, car;
-    Node *head = 0, *now;
+        int menuNumber, amount, index, numberOfSeats;
+        float liters;
+        bool isOnRun = true;
+        string currentCarKey, brand, model;
+        json carsJson, car;
+        Node *head = 0, *now;
 
-    // Парсим файл возвращаем данные, если ошибка - null
-    carsJson = parseJsonCars("cars.json");
+        // Парсим файл возвращаем данные, если ошибка - null
+        carsJson = parseJsonCars("cars.json");
 
-
-    // Проверка на ошибку парсинга файла
-    if (carsJson == NULL) {
+        // Проверка на ошибку парсинга файла
+        if (carsJson == NULL)
+        {
             return 0;
-    }
+        }
 
-    // Берём кол-во елементов в json-файле для создания такого же количества елементов в списке
-    amount = carsJson.size();
+        // Берём кол-во елементов в json-файле для создания такого же количества елементов в списке
+        amount = carsJson.size();
 
-
-    // Создание и заполнение списка данными из файла 
-    for (int i = 0; i < amount; i++)
-    {
-        currentCarKey = "car" + to_string(i+1);
-        car = carsJson[currentCarKey]; 
-        if (head == 0)
+        // Создание и заполнение списка данными из файла
+        for (int i = 0; i < amount; i++)
         {
-            head = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]); // TODO: Убрать повторы
-            now = head;
+            currentCarKey = "car" + to_string(i + 1);
+            car = carsJson[currentCarKey];
+            if (head == 0)
+            {
+                head = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]); // TODO: Убрать повторы
+                now = head;
+            }
+            else
+            {
+                now->next = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]);
+                now = now->next;
+            }
         }
-        else
+
+        // Меню программы
+        while (true)
         {
-            now->next = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]);
-            now = now->next;
+            cout << "Menu: " << endl;
+            cout << "1- Print all list" << endl;
+            cout << "2- Print element of list by number(started by 0)" << endl;
+            cout << "3- Add element to end in list" << endl;
+            cout << "4- Remove element from end in list" << endl;
+            cout << "5- Add element by position in list" << endl;
+            cout << "6- Remove element by position in list" << endl;
+            cout << "7- Quit" << endl;
+            cout << "Your choise: ";
+            cin >> menuNumber;
+
+            // Проверка на корректность введеного числа
+            if (menuNumber < 1 || menuNumber > 7)
+            {
+                cout << "Please, write correct number" << endl;
+                continue;
+            }
+
+            // Если человек хочет закончить
+            if (menuNumber == 7)
+            {
+                break;
+            }
+
+            // Действия в зависимости от того что выбрал человек
+            switch (menuNumber)
+            {
+            case 1:
+                Node::printList(head);
+                break;
+            case 2:
+                cout << "Write index of element which you want print: ";
+                cin >> index;
+                Node::printElementOfListByNum(head, index);
+                cout << endl;
+                break;
+            case 3:
+                cout << "Brand: ";
+                cin >> brand;
+                cout << "Model: ";
+                cin >> model;
+                cout << "Liters: ";
+                cin >> liters;
+                cout << "Number of seats: ";
+                cin >> numberOfSeats;
+                cout << "Is on the run: ";
+                isOnRun = true;
+                Node::addNodeByIndex(head, brand = brand, model = model, liters = liters, numberOfSeats = numberOfSeats, isOnRun = isOnRun);
+                break;
+            case 4:
+                Node::deleteNodeByIndex(head);
+                break;
+            case 5:
+                cout << "Brand: ";
+                cin >> brand;
+                cout << "Model: ";
+                cin >> model;
+                cout << "Liters: ";
+                cin >> liters;
+                cout << "Number of seats: ";
+                cin >> numberOfSeats;
+                cout << "Is on the run: ";
+                isOnRun = true;
+
+                cout << "Write index where you want insert element: ";
+                cin >> index;
+
+                Node::addNodeByIndex(head, brand = brand, model = model, liters = liters, numberOfSeats = numberOfSeats, isOnRun = isOnRun, index = index);
+                break;
+            case 6:
+                cout << "Write index of element which you want delete: ";
+                cin >> index;
+                Node::deleteNodeByIndex(head, index);
+                break;
+            }
         }
-        
-    }
 
-    // Меню программы
-    while (true) {
-        cout << "Menu: " << endl;
-        cout << "1- Print all list" << endl;
-        cout << "2- Print element of list by number(started by 0)" << endl;
-        cout << "3- Add element to end in list" << endl;
-        cout << "4- Remove element from end in list" << endl;
-        cout << "5- Add element by position in list" << endl;
-        cout << "6- Remove element by position in list" << endl;
-        cout << "7- Quit" << endl;
-        cout << "Your choise: ";
-        cin >> menuNumber;
-
-        // Проверка на корректность введеного числа
-        if (menuNumber < 1 || menuNumber > 7) {
-            cout << "Please, write correct number" << endl;
-            continue;
-        }
-
-        // Если человек хочет закончить 
-        if (menuNumber == 7) {
-            break;
-        }
-
-        // Действия в зависимости от того что выбрал человек
-        switch (menuNumber)
-        {
-        case 1:
-            Node::printList(head);
-            break;
-        case 2:
-            cout << "Write index of element which you want print: ";
-            cin >> index;
-            Node::printElementOfListByNum(head, index);
-            cout << endl;
-            break;
-        case 3:
-            Node::addNodeByIndex(head);
-            break;
-        case 4:
-            Node::deleteNodeByIndex(head);
-            break;
-        case 5:
-            Node::addNodeByIndex(head, 1);
-            break;
-        case 6:
-            Node::deleteNodeByIndex(head, 1);
-            break;
-        }
-    }
-
-    // Удаление происходит всегда 
-    Node::deleteList(head);
-    return 0;
+        // Удаление списка происходит всегда
+        Node::deleteList(head);
+        return 0;
 }
