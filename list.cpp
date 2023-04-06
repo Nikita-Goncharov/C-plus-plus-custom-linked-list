@@ -3,32 +3,36 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-// TODO: Понять как работает это
 using namespace std;
+// Подключение пространства имен
+// Мои комментарии: тут мы подключаем пространство json из библиотеки nlohmann, чтобы не юзать nlohmann полностью
 using json = nlohmann::json;
 
-
 class Node {
-    public:
-        string brand, model; 
-        float liters;
-        int numberOfSeats;
-        bool isOnTheRun;
-        Node *next = 0;
+private:
+    string brand, model;
+    float liters;
+    int numberOfSeats;
+    bool isOnTheRun;
 
-        Node(string brandFromJson, string modelFromJson, float litersFromJson, int numberOfSeatsFromJson, bool isOnTheRunFromJson)
-        {
-            brand = brandFromJson;
-            model = modelFromJson;
-            liters = litersFromJson;
-            numberOfSeats = numberOfSeatsFromJson;
-            isOnTheRun = isOnTheRunFromJson;
-        }
+public:
+    Node *next = 0;
+
+    Node(string brandFromJson, string modelFromJson, float litersFromJson, int numberOfSeatsFromJson, bool isOnTheRunFromJson)
+    {
+        // Заполняем элемент
+        brand = brandFromJson;
+        model = modelFromJson;
+        liters = litersFromJson;
+        numberOfSeats = numberOfSeatsFromJson;
+        isOnTheRun = isOnTheRunFromJson;
+    }
 
         static void printList(Node *head)
         {
             Node *currentNode = head;
 
+            // Проходимся по всем элементам и выводим их
             while (currentNode)
             {
                 cout << "Brand: " << currentNode->brand << endl;
@@ -46,29 +50,31 @@ class Node {
             int i = 0;
             Node *currentNode = head;
 
-            while (currentNode)
+            // Проходим по элементов до нужного по индексу
+            while (currentNode != NULL && i != index)
             {
-                if (i == index)
-                {
-                    cout << "We are here" << endl; // TODO: remove
-                    cout << currentNode << endl;
-                    cout << "Brand: " << currentNode->brand << endl;
-                    cout << "Model: " << currentNode->model << endl;
-                    cout << "Liters: " << currentNode->liters << endl;
-                    cout << "Number of seats: " << currentNode->numberOfSeats << endl;
-                    cout << "Is on the run: " << (currentNode->isOnTheRun ? "true" : "false") << endl;
-                    cout << endl;
-                    break; // Если элемент был выведен, то нам уже нету смысла продолжать цикл
-                    i++;
-                }
                 currentNode = currentNode->next;
+                i++;
             }
+            // Если элемента нету, то значит передан неправильный индекс
+            if (currentNode == NULL)
+            {
+                cout << "Index out of range." << endl;
+                return;
+            }
+            // Иначе выводим элемент
+            cout << "Brand: " << currentNode->brand << endl;
+            cout << "Model: " << currentNode->model << endl;
+            cout << "Liters: " << currentNode->liters << endl;
+            cout << "Number of seats: " << currentNode->numberOfSeats << endl;
+            cout << "Is on the run: " << (currentNode->isOnTheRun ? "true" : "false") << endl;
+            cout << endl;
         }
 
         static void deleteList(Node *head)
         {
             Node *currentNode;
-
+            // Проходим по всем элементам и удаляем их
             while (head)
             {
                 currentNode = head;
@@ -79,12 +85,13 @@ class Node {
 
         static void deleteNodeByIndex(Node *head, int index = -1)
         {
+            // Проверка на пустой список
             if (head == NULL)
             {
                 cout << "List is empty." << endl;
                 return;
             }
-
+            // Проверка на дефолтное значение, если -1 - удаляем последний элемент списка
             if (index == -1) {
                 Node *currentNode;
 
@@ -101,6 +108,7 @@ class Node {
                     }
                 }
             }
+            // Если индекс 0 - удаляем первый элемент
             if (index == 0)
             {
                 Node *temp = head;
@@ -108,6 +116,7 @@ class Node {
                 delete temp;
                 return;
             }
+            // Иначе проходимся по списку до нужного элемента
             Node *current = head;
             Node *prev = NULL;
             int count = 0;
@@ -117,46 +126,61 @@ class Node {
                 current = current->next;
                 count++;
             }
+            // Если элемента нету, то значит передан неправильный индекс
             if (current == NULL)
             {
                 cout << "Index out of range." << endl;
                 return;
             }
+            // Меняем ссылку предыдущего элемента на следующий, обходя элемент который мы удаляем
             prev->next = current->next;
             delete current;
         }
 
-        static void addNodeByIndex(Node *&head, string brand, string model, float liters, int numberOfSeats, bool isOnRun, int index = -1)
+        static void addNodeByIndex(Node *&head, int index = -1)
         {
+            int numberOfSeats;
+            float liters;
+            bool isOnRun = true;
+            string brand, model;
+
+            cout << "Brand: ";
+            cin >> brand;
+            cout << "Model: ";
+            cin >> model;
+            cout << "Liters: ";
+            cin >> liters;
+            cout << "Number of seats: ";
+            cin >> numberOfSeats;
+            cout << "Is on the run: ";
+
+            // Создаём новый элемент
             Node *newNode = new Node(brand, model, liters, numberOfSeats, isOnRun);
+            // Проверка на корректность индекса
             if (index < -1)
             {
                 cout << "Index out of range." << endl;
                 return;
             }
-            if (index == -1 || head == NULL)
+            // Проверка на дефолтное значение, если -1 - добавляем последним элементом списка
+            if (index == -1)
             {
-                if (head == NULL)
+                Node *current = head;
+                while (current->next != NULL)
                 {
-                    head = newNode;
+                    current = current->next;
                 }
-                else
-                {
-                    Node *current = head;
-                    while (current->next != NULL)
-                    {
-                        current = current->next;
-                    }
-                    current->next = newNode;
-                }
+                current->next = newNode;
                 return;
             }
+            // Если индекс 0 - добавляем первым элементом
             if (index == 0)
             {
                 newNode->next = head;
                 head = newNode;
                 return;
             }
+            // Иначе проходим по списку и вставляем в нужное место
             Node *current = head;
             int count = 0;
             while (current != NULL && count != index - 1)
@@ -164,11 +188,13 @@ class Node {
                 current = current->next;
                 count++;
             }
+            // Если элемента нету, то значит передан неправильный индекс
             if (current == NULL)
             {
                 cout << "Index out of range." << endl;
                 return;
             }
+            // Меняем ссылки чтобы вставить новый элемент
             newNode->next = current->next;
             current->next = newNode;
         }
@@ -200,7 +226,7 @@ int main()
         bool isOnRun = true;
         string currentCarKey, brand, model;
         json carsJson, car;
-        Node *head = 0, *now;
+        Node *head = 0, *now, *element;
 
         // Парсим файл возвращаем данные, если ошибка - null
         carsJson = parseJsonCars("cars.json");
@@ -211,7 +237,7 @@ int main()
             return 0;
         }
 
-        // Берём кол-во елементов в json-файле для создания такого же количества елементов в списке
+        // Берём кол-во элементов в json-файле для создания такого же количества элементов в списке
         amount = carsJson.size();
 
         // Создание и заполнение списка данными из файла
@@ -219,14 +245,15 @@ int main()
         {
             currentCarKey = "car" + to_string(i + 1);
             car = carsJson[currentCarKey];
+            element = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]);
             if (head == 0)
             {
-                head = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]); // TODO: Убрать повторы
+                head = element;
                 now = head;
             }
             else
             {
-                now->next = new Node(car["brand"], car["model"], car["liters"], car["numberOfSeats"], car["isOnTheRun"]);
+                now->next = element;
                 now = now->next;
             }
         }
@@ -265,48 +292,30 @@ int main()
                 Node::printList(head);
                 break;
             case 2:
+                cout << endl;
                 cout << "Write index of element which you want print: ";
                 cin >> index;
+
                 Node::printElementOfListByNum(head, index);
                 cout << endl;
                 break;
             case 3:
-                cout << "Brand: ";
-                cin >> brand;
-                cout << "Model: ";
-                cin >> model;
-                cout << "Liters: ";
-                cin >> liters;
-                cout << "Number of seats: ";
-                cin >> numberOfSeats;
-                cout << "Is on the run: ";
-                isOnRun = true;
-                Node::addNodeByIndex(head, brand = brand, model = model, liters = liters, numberOfSeats = numberOfSeats, isOnRun = isOnRun);
+                Node::addNodeByIndex(head);
                 break;
             case 4:
                 Node::deleteNodeByIndex(head);
                 break;
             case 5:
-                cout << "Brand: ";
-                cin >> brand;
-                cout << "Model: ";
-                cin >> model;
-                cout << "Liters: ";
-                cin >> liters;
-                cout << "Number of seats: ";
-                cin >> numberOfSeats;
-                cout << "Is on the run: ";
-                isOnRun = true;
-
                 cout << "Write index where you want insert element: ";
                 cin >> index;
 
-                Node::addNodeByIndex(head, brand = brand, model = model, liters = liters, numberOfSeats = numberOfSeats, isOnRun = isOnRun, index = index);
+                Node::addNodeByIndex(head, index = index);
                 break;
             case 6:
                 cout << "Write index of element which you want delete: ";
                 cin >> index;
-                Node::deleteNodeByIndex(head, index);
+
+                Node::deleteNodeByIndex(head, index = index);
                 break;
             }
         }
